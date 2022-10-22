@@ -87,12 +87,12 @@ const app = {
     app.handleAccount();
   },
   fetchConfigs: () => {
-    const auto_popup = gID("auto-popup-input").checked;
-    const dark_mode = gID("dark-mode-input").checked;
+    // const auto_popup = gID("auto-popup-input").checked;
+    // const dark_mode = gID("dark-mode-input").checked;
 
     return {
-      auto_popup,
-      dark_mode,
+      auto_popup: false,
+      dark_mode: false,
     };
   },
   setConfigs: () => {

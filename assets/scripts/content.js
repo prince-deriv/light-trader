@@ -164,10 +164,16 @@ const TOKEN_KEY = "lt_token";
 const FRAME_SRC = "http://localhost:1234/";
 const HOST_NAME = "dtrader-air.vercel.app";
 const LOGIN_POPUP = "dtrader-air-login";
+const BRANDING = "dtrader-air-branding";
+const IS_SHOW_POPUP = "is_show_popup";
 
 const host_name = window.location.hostname;
 const is_correct_hostname = () => host_name === HOST_NAME;
 const is_popup_login = () => LOGIN_POPUP === window.name;
+
+const settings = {
+  is_show_popup: localStorage.getItem(IS_SHOW_POPUP) === "true" || false,
+};
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   const { action } = request;
@@ -191,13 +197,14 @@ const applyCSS = (e, css) => {
   });
 };
 
-const buildPopUp = () => {
+const handlePopup = () => {
   const existing_popup = gID(POPUP_ID);
 
-  if (!existing_popup) {
-    const popup = document.createElement("section");
-    const iframe = document.createElement("iframe");
+  const popup = document.createElement("section");
+  const iframe = document.createElement("iframe");
+  const branding = document.createElement("img");
 
+  if (!existing_popup && !is_popup_login() && !inIframe()) {
     popup.setAttribute("id", POPUP_ID);
 
     applyCSS(popup, {
@@ -211,6 +218,7 @@ const buildPopUp = () => {
       borderRadius: "10px",
       boxShadow: "#aaa 0px 0px 10px",
       padding: "10px",
+      transition: "all 0.2s ease-in",
     });
 
     iframe.setAttribute("id", FRAME_ID);
@@ -225,30 +233,82 @@ const buildPopUp = () => {
       borderRadius: "10px",
     });
 
+    branding.setAttribute(
+      "src",
+      "https://prince-deriv.github.io/light-trader/assets/images/icon.png"
+    );
+    branding.setAttribute("id", BRANDING);
+    branding.addEventListener("click", () => {
+      const { is_show_popup } = settings;
+
+      settings.is_show_popup = !is_show_popup;
+      localStorage.setItem(IS_SHOW_POPUP, !is_show_popup);
+
+      togglePopup();
+    });
+
+    applyCSS(branding, {
+      borderRadius: "10px",
+      width: "50px",
+      height: "50px",
+      position: "absolute",
+      top: "15px",
+      left: "-20px",
+      cursor: "pointer",
+      boxShadow: "1px 1px 10px #3c90de",
+    });
+
     popup.appendChild(iframe);
+    popup.appendChild(branding);
 
     document.body.appendChild(popup);
+
+    togglePopup();
   }
 };
 
-const destroyPopUp = () => {
-  const existing_popup = gID(POPUP_ID);
+const togglePopup = () => {
+  const { is_show_popup } = settings;
+  const current_popup = gID(POPUP_ID);
+  const current_branding = gID(BRANDING);
 
-  if (existing_popup) {
-    existing_popup.parentNode.removeChild(existing_popup);
+  if (is_show_popup) {
+    applyCSS(current_popup, {
+      width: "320px",
+      height: "600px",
+    });
+
+    applyCSS(current_branding, {
+      top: "15px",
+      left: "-20px",
+    });
+  } else {
+    applyCSS(current_popup, {
+      width: "0px",
+      height: "0px",
+    });
+
+    applyCSS(current_branding, {
+      top: "-30px",
+      left: "-30px",
+    });
   }
 };
 
 const launchApp = () => {
-  chrome.storage.local.get(["dark_mode", "auto_popup"], function (result) {
-    const { auto_popup } = result;
+  handlePopup();
 
-    if (auto_popup && !is_popup_login() && !inIframe()) {
-      buildPopUp();
-    } else {
-      destroyPopUp();
-    }
-  });
+  // chrome.storage.local.get(["dark_mode", "auto_popup"], function (result) {
+  //   const { auto_popup } = result;
+
+  //   settings.auto_popup = auto_popup;
+
+  //   if (auto_popup && !is_popup_login() && !inIframe()) {
+  //     buildPopUp();
+  //   } else {
+  //     destroyPopUp();
+  //   }
+  // });
 };
 
 const inIframe = () => {
