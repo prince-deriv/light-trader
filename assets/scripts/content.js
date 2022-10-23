@@ -256,6 +256,8 @@ const handlePopup = () => {
       left: "-20px",
       cursor: "pointer",
       boxShadow: "1px 1px 10px #3c90de",
+      transition: "all 0.2s ease-in",
+      background: THEME_COLOR,
     });
 
     popup.appendChild(iframe);
