@@ -83,24 +83,27 @@ const hideLoading = () => {
 
 const app = {
   init: () => {
-    app.setConfigs();
     app.handleAccount();
+    app.loadConfigs();
   },
   fetchConfigs: () => {
-    // const auto_popup = gID("auto-popup-input").checked;
-    // const dark_mode = gID("dark-mode-input").checked;
+    const auto_popup = gID("auto-popup-input").checked;
 
     return {
-      auto_popup: false,
-      dark_mode: false,
+      auto_popup,
     };
   },
   setConfigs: () => {
     const configs = app.fetchConfigs();
 
-    console.log({ configs });
-
     chrome.storage.local.set(configs, () => {});
+  },
+  loadConfigs: () => {
+    chrome.storage.local.get(["auto_popup"], function (result) {
+      const { auto_popup } = result;
+
+      gID("auto-popup-input").checked = auto_popup;
+    });
   },
   handleAccount: () => {
     chrome.storage.local.get([TOKEN_KEY], function (result) {

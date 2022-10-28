@@ -300,17 +300,20 @@ const togglePopup = () => {
 const launchApp = () => {
   handlePopup();
 
-  // chrome.storage.local.get(["dark_mode", "auto_popup"], function (result) {
-  //   const { auto_popup } = result;
+  chrome.storage.local.get(["dark_mode", "auto_popup"], function (result) {
+    const { auto_popup } = result;
 
-  //   settings.auto_popup = auto_popup;
+    settings.auto_popup = auto_popup;
+    const current_popup = gID(POPUP_ID);
 
-  //   if (auto_popup && !is_popup_login() && !inIframe()) {
-  //     buildPopUp();
-  //   } else {
-  //     destroyPopUp();
-  //   }
-  // });
+    if (current_popup) {
+      if (auto_popup && !is_popup_login() && !inIframe()) {
+        current_popup.style.top = "";
+      } else {
+        current_popup.style.top = "-9999999px";
+      }
+    }
+  });
 };
 
 const inIframe = () => {
